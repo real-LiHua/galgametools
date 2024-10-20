@@ -34,8 +34,27 @@ async def task(path):
     logger.info(f"已翻译：{path}")
 
 
+async def link(path):
+    old_name = path.name
+    for k, v in fy:
+        new_name = old_name.replace(k, v)
+        if new_name == old_name:
+            continue
+        new_path = path.parents[0] / new_name
+        try:
+            new_path.symlink_to(path.name)
+            logger.info(f"已翻译：{path}")
+        except:
+            pass
+
+
 async def main():
+    logger.info("正在翻译游戏数据")
     await asyncio.gather(*[task(path) for path in Path("data").glob("*.json")])
+    logger.info("正在翻译图片文件名")
+    await asyncio.gather(*[link(path) for path in Path("img").glob("**/*")])
+    logger.info("正在翻译音频文件名")
+    await asyncio.gather(*[link(path) for path in Path("audio").glob("**/*.ogg_")])
 
 
 asyncio.run(main())
