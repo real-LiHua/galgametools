@@ -1,24 +1,30 @@
-"""
-不区分路径大小写的简单 HTTP 服务器
-"""
+"""不区分路径大小写的简单 HTTP 服务器"""
+
 import http.server
-import os
 import socketserver
 import sys
 from pathlib import Path
+from typing import override
 
 glob = Path(".").glob
 
+
 class FuckWindows(http.server.SimpleHTTPRequestHandler):
+    @override
     def do_GET(self):
-        if self.path == '/':
-            self.path = "/" + str(next(glob("index.htm{l,}", case_sensitive=False)))
-        else:
-            try:
-                self.path = "/" + str(next(glob(self.path[1:], case_sensitive=False)))
-            except StopIteration:
-                pass
+        try:
+            self.path: str = "/" + str(
+                next(
+                    glob(
+                        "index.htm{l,}" if self.path == "/" else self.path[1:],
+                        case_sensitive=False,
+                    )
+                )
+            )
+        except StopIteration:
+            pass
         return super().do_GET()
+
 
 port = 0
 try:
