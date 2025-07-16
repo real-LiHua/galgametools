@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 fy = sorted(list(json.load(open(sys.argv[1])).items()), key=lambda x: -len(x[0]))
 
 
-async def task(path):
+async def task(path: Path):
     with open(path) as f:
         s = f.read()
         old = s
@@ -30,11 +30,11 @@ async def task(path):
                     s = new
             except JSONDecodeError:
                 logger.error(f"{path} {k} {v}")
-    path.write_text(s)
+    _ = path.write_text(s)
     logger.info(f"已翻译：{path}")
 
 
-async def link(path):
+async def link(path: Path):
     old_name = path.name
     for k, v in fy:
         new_name = old_name.replace(k, v)
@@ -50,11 +50,11 @@ async def link(path):
 
 async def main():
     logger.info("正在翻译游戏数据")
-    await asyncio.gather(*[task(path) for path in Path("data").glob("*.json")])
+    _ = await asyncio.gather(*[task(path) for path in Path("data").glob("*.json")])
     logger.info("正在翻译图片文件名")
-    await asyncio.gather(*[link(path) for path in Path("img").glob("**/*")])
+    _ = await asyncio.gather(*[link(path) for path in Path("img").glob("**/*")])
     logger.info("正在翻译音频文件名")
-    await asyncio.gather(*[link(path) for path in Path("audio").glob("**/*.ogg_")])
+    _ = await asyncio.gather(*[link(path) for path in Path("audio").glob("**/*.ogg_")])
 
 
 asyncio.run(main())

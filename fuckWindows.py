@@ -1,23 +1,23 @@
 """不区分路径大小写的简单 HTTP 服务器"""
 
-import http.server
-import socketserver
 import sys
+from http.server import SimpleHTTPRequestHandler
+from os.path import abspath
 from pathlib import Path
+from socketserver import TCPServer
 from typing import override
 
 glob = Path(".").glob
 
 
-class FuckWindows(http.server.SimpleHTTPRequestHandler):
+class FuckWindows(SimpleHTTPRequestHandler):
     @override
     def do_GET(self):
         try:
             self.path: str = "/" + str(
                 next(
                     glob(
-                        "index.htm{l,}" if self.path == "/" else self.path[1:],
-                        case_sensitive=False,
+                        abspath(self.path)[1:] or "index.htm{l,}", case_sensitive=False
                     )
                 )
             )
@@ -32,6 +32,6 @@ try:
 except IndexError | ValueError:
     print("用法：", sys.argv[0], "<端口>")
 if port:
-    with socketserver.TCPServer(("", port), FuckWindows) as httpd:
+    with TCPServer(("", port), FuckWindows) as httpd:
         print(f"serving at port {port}")
         httpd.serve_forever()
