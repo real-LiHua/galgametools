@@ -34,4 +34,8 @@ except IndexError | ValueError:
 if port:
     with TCPServer(("", port), FuckWindows) as httpd:
         print(f"serving at port {port}")
-        httpd.serve_forever()
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            print("\nKeyboard interrupt received, exiting.")
+            sys.exit(0)
